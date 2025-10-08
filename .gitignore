@@ -1,10 +1,11 @@
-# Arquivos de dados grandes (txt)
-Extracoes/**/*.txt
-dist/**/Extracoes/**/*.txt
+# Arquivos de dados grandes (txt) - apenas os que excedem 100MB do GitHub
+Extracoes/KE5Z/ke5z*.txt
+Extracoes/KSBB/ksbb*.txt
+dist/**/Extracoes/**/ke5z*.txt
+dist/**/Extracoes/**/ksbb*.txt
 
-# Arquivos de build e distribuição
+# Arquivos de build (mas manter dist com arquivos importantes)
 build/
-dist/
 
 # Arquivos Python
 __pycache__/

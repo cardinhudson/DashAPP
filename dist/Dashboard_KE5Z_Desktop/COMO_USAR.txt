@@ -1,0 +1,113 @@
+===============================================
+    DASHBOARD KE5Z - VERSÃO DESKTOP
+===============================================
+
+🎉 PARABÉNS! Você tem o Dashboard KE5Z funcionando!
+
+===============================================
+    COMO USAR:
+===============================================
+
+1. EXECUTAR A APLICACAO:
+   
+   OPCAO 1 - Executavel direto:
+   - Clique duas vezes no arquivo: Dashboard_KE5Z_Desktop.exe
+   
+   OPCAO 2 - Script simples:
+   - Clique duas vezes no arquivo: ABRIR_DASHBOARD.bat
+   
+   - Aguarde alguns segundos para o aplicativo carregar
+   - A aplicação abrirá automaticamente no seu navegador
+
+2. ACESSO:
+   - A aplicação abrirá automaticamente no navegador
+   - Se não abrir, acesse: http://localhost:8501
+   - Use as credenciais configuradas para fazer login
+
+3. FUNCIONALIDADES:
+   - Dashboard principal com métricas financeiras
+   - Análise de dados por período
+   - Relatórios avançados e exportação
+   - Sistema de usuários e administração
+   - Extração de dados automatizada
+   - Análise waterfall interativa
+
+===============================================
+    CREDENCIAIS PADRÃO:
+===============================================
+
+👤 ADMINISTRADOR:
+   - Usuário: admin
+   - Senha: admin123
+   - Acesso: Completo
+
+👤 USUÁRIO PADRÃO:
+   - Usuário: user
+   - Senha: user123
+   - Acesso: Limitado
+
+===============================================
+    REQUISITOS:
+===============================================
+
+✅ NENHUM! Este executável funciona sem Python instalado
+✅ Windows 10/11
+✅ Navegador web (Chrome, Firefox, Edge, etc.)
+
+===============================================
+    SOLUÇÃO DE PROBLEMAS:
+===============================================
+
+❌ Se o executável não abrir:
+   - Verifique se o Windows Defender não está bloqueando
+   - Execute como administrador se necessário
+
+❌ Se o navegador não abrir automaticamente:
+   - Acesse manualmente: http://localhost:8501
+   - Verifique se a porta não está sendo usada
+
+❌ Se aparecer erro de módulo:
+   - Certifique-se de que todos os arquivos estão na mesma pasta
+   - Não mova arquivos individuais para fora da pasta
+
+❌ Se os dados não carregarem:
+   - Verifique se as pastas KE5Z, arquivos e Extracoes estão presentes
+   - Execute a extração de dados na página correspondente
+
+===============================================
+    ESTRUTURA DE ARQUIVOS:
+===============================================
+
+📁 Dashboard_KE5Z_Desktop/
+├── 📄 Dashboard_KE5Z_Desktop.exe    # Executável principal
+├── 📄 ABRIR_DASHBOARD.bat           # Script de abertura
+├── 📄 COMO_USAR.txt                 # Este arquivo
+├── 📄 README.md                     # Documentação técnica
+├── 📄 INSTRUCOES_DISTRIBUICAO.txt   # Guia de distribuição
+├── 📄 auth_simple.py                # Sistema de autenticação
+├── 📄 usuarios.json                 # Dados de usuários
+├── 📄 dados_equipe.json             # Dados da aplicação
+├── 📄 Dados SAPIENS.xlsx            # Dados auxiliares
+├── 📄 Fornecedores.xlsx             # Dados auxiliares
+├── 📁 KE5Z/                         # Dados processados
+├── 📁 arquivos/                     # Arquivos Excel gerados
+├── 📁 Extracoes/                    # Dados brutos para processamento
+├── 📁 pages/                        # Páginas do dashboard
+└── 📁 _internal/                    # Arquivos internos (não mexer)
+
+===============================================
+    SUPORTE:
+===============================================
+
+Para suporte ou dúvidas, entre em contato com a equipe de desenvolvimento.
+
+Versão: 3.0.0
+Data: 30/01/2025
+Status: ✅ FUNCIONANDO
+
+===============================================
+    DESENVOLVIDO COM ❤️
+===============================================
+
+Dashboard KE5Z - Sistema de Análise Financeira
+Desenvolvido com Streamlit Desktop App
