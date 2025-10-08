@@ -1,0 +1,36 @@
+# Arquivos de dados grandes (txt)
+Extracoes/**/*.txt
+dist/**/Extracoes/**/*.txt
+
+# Arquivos de build e distribuição
+build/
+dist/
+
+# Arquivos Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# Arquivos de IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Arquivos de sistema
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# Arquivos temporários
+*.tmp
+*.temp

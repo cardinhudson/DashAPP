@@ -1,0 +1,30 @@
+# Dashboard KE5Z - Dependências do Projeto
+# Sistema Avançado de Análise Financeira com Streamlit
+
+# Framework Web Principal
+streamlit>=1.28.0
+
+# Manipulação de Dados
+pandas>=2.0.0
+numpy>=1.24.0
+
+# Visualizações e Gráficos
+altair>=5.0.0
+plotly>=5.15.0
+
+# Processamento de Arquivos
+openpyxl>=3.1.0
+pyarrow>=12.0.0
+
+# Utilitários do Sistema
+python-dateutil>=2.8.0
+
+# Dependências opcionais para melhor performance
+# (descomente se necessário)
+# numba>=0.57.0
+# scipy>=1.10.0
+
+# Dependências para desenvolvimento (opcional)
+# pytest>=7.0.0
+# black>=23.0.0
+# flake8>=6.0.0
