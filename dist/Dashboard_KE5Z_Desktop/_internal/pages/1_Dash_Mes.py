@@ -168,9 +168,10 @@ st.sidebar.markdown("---")
 st.sidebar.markdown("**🗂️ Dados**")
 
 # Verificar quais arquivos estão disponíveis
+base_path = get_base_path()
 arquivos_status = {}
 for tipo, nome in [("completo", "KE5Z.parquet"), ("main", "KE5Z_main.parquet"), ("others", "KE5Z_others.parquet")]:
-    caminho = os.path.join("KE5Z", nome)
+    caminho = os.path.join(base_path, "KE5Z", nome)
     arquivos_status[tipo] = os.path.exists(caminho)
 
 # Opções disponíveis baseadas nos arquivos existentes
@@ -636,6 +637,7 @@ if not df_mes.empty:
         @st.cache_data(ttl=3600, max_entries=2, persist="disk")
         def load_original_data_for_table(arquivo_tipo):
             """Carrega dados dos arquivos originais APENAS para a tabela completa"""
+            base_path = get_base_path()
             arquivos_originais = {
                 "main": "KE5Z_main.parquet",
                 "others": "KE5Z_others.parquet", 
@@ -644,7 +646,7 @@ if not df_mes.empty:
             }
             
             nome_arquivo = arquivos_originais.get(arquivo_tipo, "KE5Z.parquet")
-            arquivo_path = os.path.join("KE5Z", nome_arquivo)
+            arquivo_path = os.path.join(base_path, "KE5Z", nome_arquivo)
             
             if os.path.exists(arquivo_path):
                 df = pd.read_parquet(arquivo_path)
