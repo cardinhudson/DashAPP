@@ -287,10 +287,10 @@ def executar_extracao(meses_filtro=None, progress_callback=None):
 
 def verificar_arquivos_gerados():
     """Verifica quais arquivos foram gerados pela extração"""
-    # Obter diretório base (onde está o executável)
+    # Obter diretório base (onde os arquivos são salvos - diretório do executável)
     if hasattr(sys, '_MEIPASS'):
-        # Executando dentro do PyInstaller
-        base_dir = sys._MEIPASS
+        # Executando dentro do PyInstaller - arquivos são salvos no diretório do executável
+        base_dir = os.path.dirname(sys.executable)
     else:
         # Executando normalmente
         base_dir = os.getcwd()
@@ -344,10 +344,10 @@ def verificar_arquivos_gerados():
 def aplicar_filtro_mes_excel(meses_filtro):
     """Aplica filtro de mês nos arquivos Excel específicos"""
     try:
-        # Obter diretório base (onde está o executável)
+        # Obter diretório base (onde os arquivos são salvos - diretório do executável)
         if hasattr(sys, '_MEIPASS'):
-            # Executando dentro do PyInstaller
-            base_dir = sys._MEIPASS
+            # Executando dentro do PyInstaller - arquivos são salvos no diretório do executável
+            base_dir = os.path.dirname(sys.executable)
         else:
             # Executando normalmente
             base_dir = os.getcwd()

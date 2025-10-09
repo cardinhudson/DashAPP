@@ -8,12 +8,24 @@ import streamlit as st
 import json
 import hashlib
 import os
+import sys
 from datetime import datetime
 from typing import Dict, Any, Optional, List
 
+# Função para determinar diretório base
+def get_data_dir():
+    """Retorna o diretório onde os arquivos de dados devem ser salvos"""
+    if hasattr(sys, '_MEIPASS'):
+        # No executável: salvar no diretório do executável (fora do _internal)
+        return os.path.dirname(sys.executable)
+    else:
+        # Em desenvolvimento: diretório atual
+        return os.path.dirname(os.path.abspath(__file__))
+
 # Configurações do sistema
-USUARIOS_FILE = "usuarios.json"
-USUARIOS_PADRAO_FILE = "usuarios_padrao.json"
+DATA_DIR = get_data_dir()
+USUARIOS_FILE = os.path.join(DATA_DIR, "usuarios.json")
+USUARIOS_PADRAO_FILE = os.path.join(DATA_DIR, "usuarios_padrao.json")
 
 def carregar_usuarios() -> Dict[str, Any]:
     """Carrega usuários do arquivo JSON"""

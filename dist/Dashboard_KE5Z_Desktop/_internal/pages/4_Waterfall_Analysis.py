@@ -109,7 +109,7 @@ def load_df(arquivo_tipo="completo") -> pd.DataFrame:
     """Carrega dados DIRETAMENTE do waterfall para máxima otimização de memória"""
     
     # USAR APENAS ARQUIVO WATERFALL OTIMIZADO (72% menor!)
-    arquivo_waterfall = os.path.join("KE5Z", "KE5Z_waterfall.parquet")
+    arquivo_waterfall = os.path.join("_internal", "KE5Z", "KE5Z_waterfall.parquet")
     if os.path.exists(arquivo_waterfall):
         try:
             df = pd.read_parquet(arquivo_waterfall)

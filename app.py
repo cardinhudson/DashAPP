@@ -2,6 +2,7 @@
 import streamlit as st
 import pandas as pd
 import os
+import sys
 import altair as alt
 import plotly.graph_objects as go
 from auth_simple import (verificar_autenticacao, exibir_header_usuario,
@@ -9,6 +10,16 @@ from auth_simple import (verificar_autenticacao, exibir_header_usuario,
                          get_usuarios_cloud, adicionar_usuario_simples, criar_hash_senha,
                          get_modo_operacao, is_modo_cloud)
 from datetime import datetime
+
+# Detectar se está rodando no executável PyInstaller
+def get_base_path():
+    """Retorna o caminho base correto para LEITURA de dados"""
+    if hasattr(sys, '_MEIPASS'):
+        # Rodando no executável PyInstaller - apontar para _internal
+        return sys._MEIPASS
+    else:
+        # Rodando em desenvolvimento
+        return os.path.dirname(os.path.abspath(__file__))
 
 # Configuração otimizada da página para melhor performance
 st.set_page_config(
@@ -75,7 +86,8 @@ def load_data_optimized(arquivo_tipo="completo"):
     }
     
     nome_arquivo = arquivos_disponiveis.get(arquivo_tipo, "KE5Z.parquet")
-    arquivo_parquet = os.path.join("KE5Z", nome_arquivo)
+    base_path = get_base_path()
+    arquivo_parquet = os.path.join(base_path, "KE5Z", nome_arquivo)
     
     try:
         if not os.path.exists(arquivo_parquet):
@@ -131,9 +143,10 @@ st.sidebar.markdown("---")
 st.sidebar.markdown("**🗂️ Dados**")
 
 # Verificar quais arquivos estão disponíveis
+base_path = get_base_path()
 arquivos_status = {}
 for tipo, nome in [("completo", "KE5Z.parquet"), ("main", "KE5Z_main.parquet"), ("others", "KE5Z_others.parquet")]:
-    caminho = os.path.join("KE5Z", nome)
+    caminho = os.path.join(base_path, "KE5Z", nome)
     arquivos_status[tipo] = os.path.exists(caminho)
 
 # Opções disponíveis baseadas nos arquivos existentes

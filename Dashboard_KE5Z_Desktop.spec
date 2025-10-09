@@ -2,16 +2,35 @@
 from PyInstaller.utils.hooks import collect_all
 from PyInstaller.utils.hooks import copy_metadata
 
-datas = [('C:\\GitHub\\Dash-V3\\app.py', '.')]
+import os
+base_path = os.path.abspath('.')
+datas = [
+    (os.path.join(base_path, 'app.py'), '.'),
+    (os.path.join(base_path, 'auth_simple.py'), '.'),
+    (os.path.join(base_path, 'Extracao.py'), '.'),
+    (os.path.join(base_path, 'pages'), 'pages'),
+    (os.path.join(base_path, 'KE5Z'), 'KE5Z'),
+    (os.path.join(base_path, 'Extracoes'), 'Extracoes'),
+    (os.path.join(base_path, 'arquivos'), 'arquivos'),
+    (os.path.join(base_path, 'usuarios.json'), '.'),
+    (os.path.join(base_path, 'usuarios_padrao.json'), '.'),
+    (os.path.join(base_path, 'dados_equipe.json'), '.'),
+    (os.path.join(base_path, 'Dados SAPIENS.xlsx'), '.'),
+    (os.path.join(base_path, 'Fornecedores.xlsx'), '.')
+]
 binaries = []
-hiddenimports = ['altair', 'auth_simple.adicionar_usuario_simples', 'auth_simple.criar_hash_senha', 'auth_simple.eh_administrador', 'auth_simple.exibir_header_usuario', 'auth_simple.get_modo_operacao', 'auth_simple.get_usuarios_cloud', 'auth_simple.is_modo_cloud', 'auth_simple.verificar_autenticacao', 'auth_simple.verificar_status_aprovado', 'base64', 'datetime.datetime', 'gc', 'io.BytesIO', 'os', 'pandas', 'plotly.graph_objects', 'streamlit', 'sys']
+hiddenimports = ['altair', 'auth_simple', 'Extracao', 'base64', 'datetime.datetime', 'gc', 'io.BytesIO', 'os', 'pandas', 'plotly.graph_objects', 'plotly', 'streamlit', 'sys']
 datas += copy_metadata('streamlit')
+datas += copy_metadata('streamlit-desktop-app')
+datas += copy_metadata('plotly')
+datas += copy_metadata('altair')
+datas += copy_metadata('pandas')
 tmp_ret = collect_all('streamlit')
 datas += tmp_ret[0]; binaries += tmp_ret[1]; hiddenimports += tmp_ret[2]
 
 
 a = Analysis(
-    ['C:\\Users\\hudso\\AppData\\Local\\Temp\\tmp6zpxdi9o.py'],
+    ['C:\\Users\\u235107\\AppData\\Local\\Temp\\tmpiap_dy0s.py'],
     pathex=['.'],
     binaries=binaries,
     datas=datas,

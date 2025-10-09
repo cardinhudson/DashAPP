@@ -40,21 +40,29 @@ print(f"Python ativo: {sys.executable}")
 print(f"Diretorio: {os.getcwd()}")
 
 # ================== CAMINHOS PADRONIZADOS (relativos à pasta principal) ==================
-# Pasta raiz do projeto
+# Pasta raiz do projeto (para ENTRADA - dentro do _internal)
 ROOT_DIR = sys._MEIPASS if hasattr(sys, '_MEIPASS') else os.path.dirname(os.path.abspath(__file__))
 
-# Pastas de entrada
+# Pasta raiz para SAÍDA (diretório do executável para arquivos de saída)
+if hasattr(sys, '_MEIPASS'):
+    # No executável: salvar no diretório do executável (fora do _internal)
+    OUTPUT_DIR = os.path.dirname(sys.executable)
+else:
+    # Em desenvolvimento: mesmo diretório
+    OUTPUT_DIR = os.path.dirname(os.path.abspath(__file__))
+
+# Pastas de entrada (dentro do _internal)
 DIR_EXTRACOES = os.path.join(ROOT_DIR, "Extracoes")
 DIR_KE5Z_IN = os.path.join(DIR_EXTRACOES, "KE5Z")
 DIR_KSBB_IN = os.path.join(DIR_EXTRACOES, "KSBB")
 
-# Arquivos auxiliares de entrada
+# Arquivos auxiliares de entrada (dentro do _internal)
 ARQ_SAPIENS = os.path.join(ROOT_DIR, "Dados SAPIENS.xlsx")
 ARQ_FORNECEDORES = os.path.join(ROOT_DIR, "Fornecedores.xlsx")
 
-# Pastas/arquivos de saída
-DIR_KE5Z_OUT = os.path.join(ROOT_DIR, "KE5Z")
-DIR_ARQUIVOS_OUT = os.path.join(ROOT_DIR, "arquivos")
+# Pastas/arquivos de saída (dentro do _internal)
+DIR_KE5Z_OUT = os.path.join(OUTPUT_DIR, "KE5Z")
+DIR_ARQUIVOS_OUT = os.path.join(OUTPUT_DIR, "arquivos")
 # ======================================================================
 
 import pandas as pd
@@ -379,6 +387,19 @@ for col in numeric_columns:
     if col in df_total.columns:
         df_total[col] = pd.to_numeric(df_total[col], errors='coerce')
 
+# Garantir que colunas de texto sejam strings
+text_columns = ['Nº conta', 'Centro cst', 'Texto', 'Fornecedor', 'Fornec.', 'Material', 
+                'Descrição Material', 'Type 05', 'Type 06', 'Type 07', 'USI', 'Oficina',
+                'Doc.compra', 'Usuário', 'Tipo', 'Cliente', 'Dt.lçto.', 'Imobilizado']
+for col in text_columns:
+    if col in df_total.columns:
+        df_total[col] = df_total[col].astype(str)
+
+# Garantir que TODAS as colunas object sejam strings (fallback)
+for col in df_total.columns:
+    if df_total[col].dtype == 'object':
+        df_total[col] = df_total[col].astype(str)
+
 # Substituir valores NaN por None para compatibilidade com PyArrow
 df_total = df_total.where(pd.notnull(df_total), None)
 
@@ -642,14 +663,47 @@ pasta_arquivos = DIR_ARQUIVOS_OUT
 os.makedirs(pasta_arquivos, exist_ok=True)
 print(f"Pasta de arquivos criada: {pasta_arquivos}")
 
-# Salvar arquivo Excel com filtro de USI 'Veículos', 'TC Ext' e 'LC'
-caminho_veiculos = os.path.join(pasta_arquivos, 'KE5Z_veiculos.xlsx')
-df_total_excel[df_total_excel['USI'].isin(['Veículos', 'TC Ext', 'LC'])].to_excel(caminho_veiculos, index=False)
-print(f"Arquivo Excel Veículos salvo: {caminho_veiculos}")
+# Salvar arquivo Excel completo primeiro (DESABILITADO - arquivo muito grande para Excel)
+# caminho_completo = os.path.join(pasta_arquivos, 'KE5Z_completo.xlsx')
+# df_total_excel.to_excel(caminho_completo, index=False)
+print(f"Arquivo Excel completo NÃO salvo (dados muito grandes: {len(df_total_excel):,} linhas > limite Excel 1.048.576)")
 
-# Salvar arquivo Excel com filtro de USI 'PWT'
-caminho_pwt = os.path.join(pasta_arquivos, 'KE5Z_pwt.xlsx')
-df_total_excel[df_total_excel['USI'].isin(['PWT'])].to_excel(caminho_pwt, index=False)
-print(f"Arquivo Excel PWT salvo: {caminho_pwt}")
+# Verificar quais USIs existem nos dados
+usis_disponiveis = df_total_excel['USI'].unique() if 'USI' in df_total_excel.columns else []
+print(f"USIs disponíveis nos dados: {list(usis_disponiveis)}")
+
+# Salvar arquivo Excel com filtro de USI 'Veículos', 'TC Ext' e 'LC' (se existirem)
+usis_veiculos = ['Veículos', 'TC Ext', 'LC']
+usis_veiculos_existentes = [usi for usi in usis_veiculos if usi in usis_disponiveis]
+
+if usis_veiculos_existentes:
+    caminho_veiculos = os.path.join(pasta_arquivos, 'KE5Z_veiculos.xlsx')
+    df_veiculos = df_total_excel[df_total_excel['USI'].isin(usis_veiculos_existentes)]
+    df_veiculos.to_excel(caminho_veiculos, index=False)
+    print(f"Arquivo Excel Veículos salvo: {caminho_veiculos} ({len(df_veiculos)} registros)")
+else:
+    print("Nenhuma USI de veículos encontrada nos dados")
+
+# Salvar arquivo Excel com filtro de USI 'PWT' (se existir)
+if 'PWT' in usis_disponiveis:
+    caminho_pwt = os.path.join(pasta_arquivos, 'KE5Z_pwt.xlsx')
+    df_pwt = df_total_excel[df_total_excel['USI'] == 'PWT']
+    df_pwt.to_excel(caminho_pwt, index=False)
+    print(f"Arquivo Excel PWT salvo: {caminho_pwt} ({len(df_pwt)} registros)")
+else:
+    print("USI PWT não encontrada nos dados")
+
+# Salvar arquivo Excel separado por USI (apenas USIs que NÃO foram agrupadas)
+if 'USI' in df_total_excel.columns:
+    usis_ja_salvas = set(usis_veiculos_existentes + (['PWT'] if 'PWT' in usis_disponiveis else []))
+    for usi in usis_disponiveis:
+        if pd.notna(usi) and usi != 'Others' and usi not in usis_ja_salvas:
+            # Normalizar nome da USI para evitar duplicação
+            nome_arquivo = usi.replace(" ", "_").replace("/", "_").replace("ç", "c").replace("ã", "a").replace("é", "e").replace("í", "i").replace("ó", "o").replace("ú", "u")
+            caminho_usi = os.path.join(pasta_arquivos, f'KE5Z_{nome_arquivo}.xlsx')
+            df_usi = df_total_excel[df_total_excel['USI'] == usi]
+            if len(df_usi) > 0:
+                df_usi.to_excel(caminho_usi, index=False)
+                print(f"Arquivo Excel {usi} salvo: {caminho_usi} ({len(df_usi)} registros)")
 
 print(f"\nTodos os arquivos Excel salvos na pasta local: {os.path.abspath(pasta_arquivos)}")

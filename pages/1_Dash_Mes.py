@@ -15,6 +15,16 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from auth_simple import (verificar_autenticacao, exibir_header_usuario,
                          eh_administrador, verificar_status_aprovado, is_modo_cloud, get_modo_operacao)
 
+# Detectar se está rodando no executável PyInstaller
+def get_base_path():
+    """Retorna o caminho base correto para LEITURA de dados"""
+    if hasattr(sys, '_MEIPASS'):
+        # Rodando no executável PyInstaller - apontar para _internal
+        return sys._MEIPASS
+    else:
+        # Rodando em desenvolvimento
+        return os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
 # Configuração otimizada da página para melhor performance
 st.set_page_config(
     page_title="Dashboard KE5Z - Mês",
@@ -73,7 +83,8 @@ def load_data_optimized(arquivo_tipo="completo"):
     """
     
     # PRIORIDADE 1: Tentar arquivo waterfall otimizado (68% menor + Nº conta!)
-    arquivo_waterfall = os.path.join("KE5Z", "KE5Z_waterfall.parquet")
+    base_path = get_base_path()
+    arquivo_waterfall = os.path.join(base_path, "KE5Z", "KE5Z_waterfall.parquet")
     if os.path.exists(arquivo_waterfall):
         try:
             df = pd.read_parquet(arquivo_waterfall)
@@ -100,7 +111,7 @@ def load_data_optimized(arquivo_tipo="completo"):
     }
     
     nome_arquivo = arquivos_disponiveis.get(arquivo_tipo, "KE5Z.parquet")
-    arquivo_parquet = os.path.join("KE5Z", nome_arquivo)
+    arquivo_parquet = os.path.join(base_path, "KE5Z", nome_arquivo)
     
     try:
         if not os.path.exists(arquivo_parquet):
@@ -466,7 +477,8 @@ if not df_mes.empty:
     @st.cache_data(ttl=1800, max_entries=2, persist="disk")
     def load_waterfall_for_graphs():
         """Carrega dados waterfall APENAS para gráficos (otimização de memória)"""
-        arquivo_waterfall = os.path.join("KE5Z", "KE5Z_waterfall.parquet")
+        base_path = get_base_path()
+        arquivo_waterfall = os.path.join(base_path, "KE5Z", "KE5Z_waterfall.parquet")
         if os.path.exists(arquivo_waterfall):
             try:
                 df_waterfall = pd.read_parquet(arquivo_waterfall)
@@ -509,7 +521,8 @@ if not df_mes.empty:
                 st.plotly_chart(fig_type05, use_container_width=True)
                 
                 # Indicador de otimização
-                if os.path.exists("KE5Z/KE5Z_waterfall.parquet"):
+                base_path = get_base_path()
+                if os.path.exists(os.path.join(base_path, "KE5Z", "KE5Z_waterfall.parquet")):
                     st.caption("⚡ Gráfico otimizado com dados waterfall")
         
         with col2:
@@ -535,7 +548,8 @@ if not df_mes.empty:
                 st.plotly_chart(fig_type06, use_container_width=True)
                 
                 # Indicador de otimização
-                if os.path.exists("KE5Z/KE5Z_waterfall.parquet"):
+                base_path = get_base_path()
+                if os.path.exists(os.path.join(base_path, "KE5Z", "KE5Z_waterfall.parquet")):
                     st.caption("⚡ Gráfico otimizado com dados waterfall")
     
     with tab2:
