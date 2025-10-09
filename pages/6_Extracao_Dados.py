@@ -47,6 +47,147 @@ st.subheader("Execução do Script Extração.py")
 exibir_header_usuario()
 
 st.markdown("---")
+
+# Seção de Links para Pastas
+st.subheader("📁 Acesso Rápido às Pastas")
+col1, col2, col3 = st.columns(3)
+
+with col1:
+    st.markdown("### 📊 Arquivos Parquet")
+    st.markdown("**Localização:** `_internal/KE5Z/`")
+    st.markdown("**Arquivos:**")
+    st.markdown("- `KE5Z.parquet` (dados originais)")
+    st.markdown("- `KE5Z_main.parquet` (dados principais)")
+    st.markdown("- `KE5Z_others.parquet` (dados secundários)")
+    st.markdown("- `KE5Z_waterfall.parquet` (dados otimizados)")
+
+with col2:
+    st.markdown("### 📄 Arquivos Excel")
+    st.markdown("**Localização:** `arquivos/`")
+    st.markdown("**Arquivos:**")
+    st.markdown("- `KE5Z_[USI].xlsx` (por USI)")
+    st.markdown("- `KE5Z_veiculos.xlsx`")
+    st.markdown("- `KE5Z_imoveis.xlsx`")
+    st.markdown("- `KE5Z_equipamentos.xlsx`")
+
+with col3:
+    st.markdown("### 📝 Arquivos TXT")
+    st.markdown("**Localização:** `_internal/Extracoes/`")
+    st.markdown("**Pastas:**")
+    st.markdown("- `KE5Z/` (arquivos KE5Z)")
+    st.markdown("- `KSBB/` (arquivos KSBB)")
+    st.markdown("- `KSBB_veiculos/` (veículos)")
+    st.markdown("- `KSBB_imoveis/` (imóveis)")
+
+# Botões para abrir pastas
+st.markdown("### 🔗 Abrir Pastas")
+col1, col2, col3 = st.columns(3)
+
+with col1:
+    if st.button("📂 Abrir Pasta Parquet", help="Abre a pasta com arquivos .parquet"):
+        parquet_path = os.path.join(os.path.dirname(sys.executable), "_internal", "KE5Z")
+        if os.path.exists(parquet_path):
+            os.startfile(parquet_path)
+            st.success("✅ Pasta aberta!")
+        else:
+            st.error("❌ Pasta não encontrada!")
+
+with col2:
+    if st.button("📂 Abrir Pasta Excel", help="Abre a pasta com arquivos .xlsx"):
+        excel_path = os.path.join(os.path.dirname(sys.executable), "arquivos")
+        if os.path.exists(excel_path):
+            os.startfile(excel_path)
+            st.success("✅ Pasta aberta!")
+        else:
+            st.error("❌ Pasta não encontrada!")
+
+with col3:
+    if st.button("📂 Abrir Pasta TXT", help="Abre a pasta com arquivos .txt"):
+        txt_path = os.path.join(os.path.dirname(sys.executable), "_internal", "Extracoes")
+        if os.path.exists(txt_path):
+            os.startfile(txt_path)
+            st.success("✅ Pasta aberta!")
+        else:
+            st.error("❌ Pasta não encontrada!")
+
+# Seção de Status dos Arquivos
+st.markdown("### 📊 Status dos Arquivos")
+col1, col2, col3 = st.columns(3)
+
+def verificar_arquivo_existe(caminho):
+    """Verifica se um arquivo ou pasta existe"""
+    return os.path.exists(caminho)
+
+def obter_tamanho_arquivo(caminho):
+    """Obtém o tamanho de um arquivo em MB"""
+    try:
+        if os.path.isfile(caminho):
+            tamanho_bytes = os.path.getsize(caminho)
+            return round(tamanho_bytes / (1024 * 1024), 2)
+        return 0
+    except:
+        return 0
+
+def contar_arquivos_pasta(caminho):
+    """Conta quantos arquivos existem em uma pasta"""
+    try:
+        if os.path.isdir(caminho):
+            return len([f for f in os.listdir(caminho) if os.path.isfile(os.path.join(caminho, f))])
+        return 0
+    except:
+        return 0
+
+# Verificar arquivos Parquet
+with col1:
+    st.markdown("**📊 Arquivos Parquet:**")
+    parquet_dir = os.path.join(os.path.dirname(sys.executable), "_internal", "KE5Z")
+    if verificar_arquivo_existe(parquet_dir):
+        arquivos_parquet = [f for f in os.listdir(parquet_dir) if f.endswith('.parquet')]
+        st.success(f"✅ {len(arquivos_parquet)} arquivos encontrados")
+        for arquivo in arquivos_parquet:
+            caminho_arquivo = os.path.join(parquet_dir, arquivo)
+            tamanho = obter_tamanho_arquivo(caminho_arquivo)
+            st.markdown(f"- `{arquivo}` ({tamanho} MB)")
+    else:
+        st.error("❌ Pasta não encontrada")
+
+# Verificar arquivos Excel
+with col2:
+    st.markdown("**📄 Arquivos Excel:**")
+    excel_dir = os.path.join(os.path.dirname(sys.executable), "arquivos")
+    if verificar_arquivo_existe(excel_dir):
+        arquivos_excel = [f for f in os.listdir(excel_dir) if f.endswith('.xlsx')]
+        st.success(f"✅ {len(arquivos_excel)} arquivos encontrados")
+        for arquivo in arquivos_excel[:5]:  # Mostrar apenas os primeiros 5
+            caminho_arquivo = os.path.join(excel_dir, arquivo)
+            tamanho = obter_tamanho_arquivo(caminho_arquivo)
+            st.markdown(f"- `{arquivo}` ({tamanho} MB)")
+        if len(arquivos_excel) > 5:
+            st.markdown(f"... e mais {len(arquivos_excel) - 5} arquivos")
+    else:
+        st.error("❌ Pasta não encontrada")
+
+# Verificar arquivos TXT
+with col3:
+    st.markdown("**📝 Arquivos TXT:**")
+    txt_dir = os.path.join(os.path.dirname(sys.executable), "_internal", "Extracoes")
+    if verificar_arquivo_existe(txt_dir):
+        total_txt = 0
+        for subdir in ['KE5Z', 'KSBB', 'KSBB_veiculos', 'KSBB_imoveis']:
+            subdir_path = os.path.join(txt_dir, subdir)
+            if verificar_arquivo_existe(subdir_path):
+                arquivos_txt = [f for f in os.listdir(subdir_path) if f.endswith('.txt')]
+                total_txt += len(arquivos_txt)
+        st.success(f"✅ {total_txt} arquivos encontrados")
+        for subdir in ['KE5Z', 'KSBB', 'KSBB_veiculos', 'KSBB_imoveis']:
+            subdir_path = os.path.join(txt_dir, subdir)
+            if verificar_arquivo_existe(subdir_path):
+                arquivos_txt = [f for f in os.listdir(subdir_path) if f.endswith('.txt')]
+                st.markdown(f"- `{subdir}/`: {len(arquivos_txt)} arquivos")
+    else:
+        st.error("❌ Pasta não encontrada")
+
+st.markdown("---")
 # Garantir logs na sessão antes de usar
 if 'logs' not in st.session_state:
     st.session_state.logs = []

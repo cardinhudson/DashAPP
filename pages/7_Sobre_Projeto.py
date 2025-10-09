@@ -85,9 +85,12 @@ exibir_header_usuario()
 st.markdown("""
 <div style="text-align: center; padding: 2rem; background: linear-gradient(90deg, #667eea 0%, #764ba2 100%); border-radius: 10px; margin-bottom: 2rem;">
     <h1 style="color: white; font-size: 3rem; margin: 0;">🎯 Dashboard KE5Z</h1>
-    <h3 style="color: #f0f0f0; margin: 0;">Sistema Avançado de Análise Financeira</h3>
+    <h3 style="color: #f0f0f0; margin: 0;">Aplicação Desktop Completa</h3>
     <p style="color: #e0e0e0; font-size: 1.2rem; margin-top: 1rem;">
-        Aplicação Desktop completa para análise de dados SAP com extração automática e otimizações avançadas
+        Executável independente para análise de dados SAP com extração automática e otimizações avançadas
+    </p>
+    <p style="color: #d0d0d0; font-size: 1rem; margin-top: 0.5rem;">
+        🖥️ Funciona sem Python instalado • ⚡ Performance otimizada • 🔄 Extração automática • 📊 7 páginas completas
     </p>
 </div>
 """, unsafe_allow_html=True)
@@ -109,13 +112,13 @@ st.markdown("---")
 col1, col2, col3, col4 = st.columns(4)
 
 with col1:
-    st.metric("💻 Linhas de Código", "3.500+", "Sistema completo")
+    st.metric("💻 Linhas de Código", "4.000+", "Sistema completo")
 
 with col2:
     st.metric("⚡ Otimização", "68%", "Memória reduzida")
 
 with col3:
-    st.metric("📊 Páginas", "7", "Funcionalidades completas")
+    st.metric("📊 Páginas", "9", "Funcionalidades completas")
 
 with col4:
     st.metric("🖥️ Aplicação", "Desktop", "Executável independente")
@@ -126,17 +129,18 @@ st.subheader("🎯 Objetivos do Projeto")
 
 st.markdown("""
 **🎯 Objetivos do Projeto:**
-- 📈 Análise avançada de dados financeiros
-- ⚡ Performance otimizada para grandes volumes
-- 🔐 Sistema de autenticação robusto
-- 📱 Interface responsiva e intuitiva
-- 🖥️ **Aplicação Desktop independente:** Executável que funciona em qualquer PC Windows 11
+- 📈 **Análise avançada de dados financeiros** com visualizações interativas
+- ⚡ **Performance otimizada** para grandes volumes (68% redução de memória)
+- 🔐 **Sistema de autenticação robusto** com administração de usuários
+- 📱 **Interface responsiva** e intuitiva com 7 páginas funcionais
+- 🖥️ **Aplicação Desktop independente:** Executável que funciona em qualquer PC Windows 10/11
 - 🔄 **Extração automática de dados:** Processamento inteligente de arquivos TXT para Parquet otimizado
-- 🎯 **Análise Type 07 avançada:** Filtros específicos por Type 05, Type 06 e Período com seleção dinâmica de Top N
-- 📊 **Tabelas inteligentes:** Filtragem automática para mostrar apenas valores diferentes de zero
-- 🔧 **Interface limpa:** Remoção de mensagens de debug para melhor experiência do usuário
-- 📦 **Transformação inteligente de dados:** Conversão automática de arquivos TXT muito grandes em arquivos Parquet otimizados, reduzindo drasticamente o tamanho dos arquivos (até 10x menor) e melhorando significativamente a performance de carregamento e processamento
-- 🚀 **Portabilidade total:** Aplicação completa em uma única pasta, sem necessidade de instalação de Python
+- 📊 **Dashboards especializados:** Mensal, Total Accounts, Waterfall Analysis
+- 🤖 **Assistente inteligente:** IUD Assistant para análises conversacionais
+- 📥 **Extração de dados:** Interface completa para processamento de arquivos
+- 👑 **Administração:** Gerenciamento completo de usuários
+- 📦 **Transformação inteligente:** Conversão TXT → Parquet (até 10x menor)
+- 🚀 **Portabilidade total:** Aplicação completa em uma única pasta, sem Python
 """)
 
 # Desafio Principal do Projeto
@@ -421,42 +425,33 @@ col1, col2 = st.columns(2)
 with col1:
     with st.expander("📊 **DASHBOARDS INTERATIVOS**", expanded=True):
         st.markdown("""
-        ### 🏠 Dashboard Principal
-        - **Gráficos dinâmicos** por Período, Type 05, Type 06
-        - **Análise Type 07** com filtros específicos (Type 05, Type 06, Período)
-        - **Top N dinâmico** (10, 15, 20, 30, 50, 100) para Type 07
-        - **Tabelas interativas** com filtros avançados
-        - **11 filtros principais** + 4 filtros avançados
-        - **Tabela pivot filtrada** (apenas valores ≠ 0)
-        - **Exportação Excel** com formatação
-        
-        ### 📅 Dashboard Mensal
+        ### 📅 Dashboard Mensal (1_Dash_Mes.py)
         - **Análise focada** em um período específico
         - **Filtro de período** simplificado e funcional
-        - **Gráficos otimizados** com dados filtrados
+        - **Gráficos otimizados** com dados waterfall
         - **Performance superior** para análises detalhadas
         - **Download inteligente** com limites de segurança
         - **🛡️ Proteção Cloud:** 50.000 linhas máximo
         - **💻 Modo Local:** Até 1M+ linhas (limite Excel)
         - **✅ Filtros garantidos** no download Excel
         
-        ### 📊 Total Accounts
+        ### 📊 Total Accounts (3_Total_accounts.py)
         - **Análise completa** do centro de lucro 02S
         - **100% otimizado** com dados waterfall
         - **Gráficos Type 05 e Type 06** com cores padronizadas
         - **Tabelas dinâmicas** por USI e conta contábil
         - **Interface limpa** sem mensagens de debug
-        """)
-
-    with st.expander("🔍 **ANÁLISES AVANÇADAS**", expanded=False):
-        st.markdown("""
-        ### 🌊 Waterfall Analysis
+        
+        ### 🌊 Waterfall Analysis (4_Waterfall_Analysis.py)
         - **Análise de cascata** entre períodos
         - **Visualização de variações** mês a mês
         - **Identificação de trends** e padrões
         - **100% dados waterfall** para performance máxima
-        
-        ### 🎯 IUD Assistant
+        """)
+
+    with st.expander("🔍 **ANÁLISES AVANÇADAS**", expanded=False):
+        st.markdown("""
+        ### 🤖 IUD Assistant (2_IUD_Assistant.py)
         - **Interactive User Dashboard** - Dashboard Interativo do Usuário
         - **Assistente inteligente** para análise de dados
         - **Gráficos automáticos** baseados em consultas
@@ -464,6 +459,22 @@ with col1:
         - **Interface conversacional** para exploração
         - **🤖 Chat inteligente** com processamento local
         - **🌊 Análise Waterfall** configurável
+        
+        ### 📥 Extração de Dados (6_Extracao_Dados.py)
+        - **Interface completa** para processamento de arquivos
+        - **Upload de arquivos** TXT, CSV, Excel
+        - **Processamento automático** com logs detalhados
+        - **Geração de arquivos** Parquet otimizados
+        - **Monitoramento** de progresso em tempo real
+        - **Validação** de dados e tratamento de erros
+        
+        ### 📦 Guia de Empacotamento (8_Guia_Empacotamento.py)
+        - **Instruções completas** para criar executáveis
+        - **Pré-requisitos** e configuração de ambiente
+        - **Processo passo-a-passo** de empacotamento
+        - **Solução de problemas** comuns
+        - **Checklist completo** de verificação
+        - **Dicas avançadas** para distribuição
         """)
 
 with col2:
@@ -520,17 +531,20 @@ with col2:
 
     with st.expander("🔐 **SISTEMA DE AUTENTICAÇÃO**", expanded=False):
         st.markdown("""
-        ### 👑 Administração Completa
+        ### 👑 Administração de Usuários (5_Admin_Usuarios.py)
         - **Cadastro de usuários** via interface web
         - **Exclusão segura** com confirmação obrigatória
         - **Tipos de usuário:** Administrador e Usuário
         - **Estatísticas** e análise de usuários
+        - **Edição de perfis** e permissões
+        - **Histórico de atividades** dos usuários
         
         ### 🔒 Segurança
         - **Hash SHA-256** para senhas
         - **Proteção do admin** principal
         - **Validações completas** de entrada
         - **Sessões persistentes** com logout seguro
+        - **Controle de acesso** por página
         """)
 
 st.markdown("---")
@@ -545,31 +559,33 @@ with col1:
         st.markdown("""
         ### 🏗️ Estrutura de Arquivos
         ```
-        📦 1 - APP/ (Aplicação Desktop Completa)
-        ├── 🖥️ dist/Dashboard_KE5Z/Dashboard_KE5Z.exe (Executável)
-        ├── 🏠 dashboard_main.py (Principal)
+        📦 Dashboard_KE5Z_Desktop/ (Aplicação Desktop Completa)
+        ├── 🖥️ Dashboard_KE5Z_Desktop.exe (Executável)
+        ├── 🏠 app.py (Principal)
         ├── 🔐 auth_simple.py (Autenticação)
         ├── 🔄 Extracao.py (Processamento)
         ├── 📂 pages/ (Páginas do Dashboard)
-        │   ├── 📅 1_Dash_Mes.py
-        │   ├── 📊 3_Total_accounts.py
-        │   ├── 🌊 4_Waterfall_Analysis.py
-        │   ├── 🤖 2_IUD_Assistant.py
-        │   ├── 📥 6_Extracao_Dados.py
-        │   ├── 👑 5_Admin_Usuarios.py
-        │   └── ℹ️ 7_Sobre_Projeto.py
-        ├── 📂 KE5Z/ (Dados Gerados)
-        │   ├── KE5Z.parquet (Original)
-        │   ├── KE5Z_main.parquet (Otimizado)
-        │   ├── KE5Z_others.parquet (Separado)
-        │   └── KE5Z_waterfall.parquet (68% menor)
-        ├── 📂 Extracoes/ (Dados de Entrada)
-        │   ├── KE5Z/ (Arquivos .txt)
-        │   └── KSBB/ (Arquivos .txt)
+        │   ├── 📅 1_Dash_Mes.py (Dashboard Mensal)
+        │   ├── 🤖 2_IUD_Assistant.py (Assistente IA)
+        │   ├── 📊 3_Total_accounts.py (Total Accounts)
+        │   ├── 🌊 4_Waterfall_Analysis.py (Análise Waterfall)
+        │   ├── 👑 5_Admin_Usuarios.py (Admin Usuários)
+        │   ├── 📥 6_Extracao_Dados.py (Extração Dados)
+        │   ├── ℹ️ 7_Sobre_Projeto.py (Sobre Projeto)
+        │   └── 📦 8_Guia_Empacotamento.py (Guia Empacotamento)
+        ├── 📂 _internal/ (Arquivos Internos PyInstaller)
+        │   ├── 📂 KE5Z/ (Dados Gerados)
+        │   │   ├── KE5Z.parquet (Original)
+        │   │   ├── KE5Z_main.parquet (Otimizado)
+        │   │   ├── KE5Z_others.parquet (Separado)
+        │   │   └── KE5Z_waterfall.parquet (68% menor)
+        │   └── 📂 Extracoes/ (Dados de Entrada)
+        │       ├── KE5Z/ (Arquivos .txt)
+        │       └── KSBB/ (Arquivos .txt)
         ├── 📂 arquivos/ (Excel Específicos)
         ├── 📄 Dados SAPIENS.xlsx
         ├── 📄 Fornecedores.xlsx
-        └── 📄 usuarios_padrao.json
+        └── 📄 usuarios.json
         ```
         
         ### 🔧 Tecnologias Utilizadas
