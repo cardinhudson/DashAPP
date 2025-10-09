@@ -10,11 +10,23 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from auth_simple import verificar_autenticacao, exibir_header_usuario
 
+# Função para detectar caminho base correto
+def get_base_path():
+    """Retorna o caminho base correto para LEITURA de dados"""
+    if hasattr(sys, '_MEIPASS'):
+        # Rodando no executável PyInstaller - apontar para _internal
+        return sys._MEIPASS
+    else:
+        # Rodando em desenvolvimento
+        return os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
 # Funções para persistir dados da equipe
 def salvar_dados_equipe(dados):
     """Salva os dados da equipe em arquivo JSON"""
     try:
-        with open('dados_equipe.json', 'w', encoding='utf-8') as f:
+        base_path = get_base_path()
+        dados_path = os.path.join(base_path, 'dados_equipe.json')
+        with open(dados_path, 'w', encoding='utf-8') as f:
             json.dump(dados, f, ensure_ascii=False, indent=2)
         return True
     except Exception as e:
@@ -24,8 +36,10 @@ def salvar_dados_equipe(dados):
 def carregar_dados_equipe():
     """Carrega os dados da equipe do arquivo JSON"""
     try:
-        if os.path.exists('dados_equipe.json'):
-            with open('dados_equipe.json', 'r', encoding='utf-8') as f:
+        base_path = get_base_path()
+        dados_path = os.path.join(base_path, 'dados_equipe.json')
+        if os.path.exists(dados_path):
+            with open(dados_path, 'r', encoding='utf-8') as f:
                 return json.load(f)
     except Exception as e:
         st.warning(f"Aviso ao carregar dados: {e}")
@@ -388,8 +402,10 @@ with col2:
 with col3:
     # Contar usuários
     try:
-        if os.path.exists('usuarios.json'):
-            with open('usuarios.json', 'r') as f:
+        base_path = get_base_path()
+        usuarios_path = os.path.join(base_path, 'usuarios.json')
+        if os.path.exists(usuarios_path):
+            with open(usuarios_path, 'r') as f:
                 usuarios = json.load(f)
             total_usuarios = len(usuarios)
         else:
@@ -405,8 +421,13 @@ with col3:
 
 with col4:
     # Contar arquivos Python
-    arquivos_py = len([f for f in os.listdir('.') if f.endswith('.py')])
-    arquivos_py += len([f for f in os.listdir('pages') if f.endswith('.py')])
+    base_path = get_base_path()
+    arquivos_py = len([f for f in os.listdir(base_path) if f.endswith('.py')])
+    
+    # Contar arquivos Python na pasta pages
+    pages_path = os.path.join(base_path, 'pages')
+    if os.path.exists(pages_path):
+        arquivos_py += len([f for f in os.listdir(pages_path) if f.endswith('.py')])
     
     st.metric(
         label="🐍 Arquivos Python", 
