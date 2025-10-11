@@ -23,7 +23,7 @@ if not pyvenv_path.exists():
     
     config_content = f"""home = {python_home}
 executable = {python_exe}
-command = {python_exe} -m venv {os.getcwd()}
+command = {python_exe} -m venv {os.path.dirname(os.path.abspath(__file__))}
 include-system-site-packages = true
 version = {sys.version_info.major}.{sys.version_info.minor}.{sys.version_info.micro}
 prompt = Dash
@@ -38,6 +38,11 @@ prompt = Dash
 # Verificar Python ativo
 print(f"Python ativo: {sys.executable}")
 print(f"Diretorio: {os.getcwd()}")
+
+# Verificação de caminhos para executável (não invasiva)
+if hasattr(sys, '_MEIPASS'):
+    print(f"Executando no PyInstaller - pasta _internal: {sys._MEIPASS}")
+    print(f"Pasta do executável: {os.path.dirname(sys.executable)}")
 
 # ================== CAMINHOS PADRONIZADOS (relativos à pasta principal) ==================
 # Pasta raiz do projeto (para ENTRADA - dentro do _internal)
@@ -84,6 +89,9 @@ pasta = DIR_KE5Z_IN
 if not os.path.exists(pasta):
     print(f"ERRO: Pasta local {pasta} não encontrada!")
     print(f"Pasta procurada: {os.path.abspath(pasta)}")
+    if hasattr(sys, '_MEIPASS'):
+        print(f"Pasta _internal: {sys._MEIPASS}")
+        print(f"Pasta do executável: {os.path.dirname(sys.executable)}")
     print("Criando pasta local...")
     os.makedirs(pasta, exist_ok=True)
     print(f"Pasta local criada: {os.path.abspath(pasta)}")
@@ -706,4 +714,30 @@ if 'USI' in df_total_excel.columns:
                 df_usi.to_excel(caminho_usi, index=False)
                 print(f"Arquivo Excel {usi} salvo: {caminho_usi} ({len(df_usi)} registros)")
 
-print(f"\nTodos os arquivos Excel salvos na pasta local: {os.path.abspath(pasta_arquivos)}")
+# Mensagem final com link clicável para a pasta de arquivos Excel
+pasta_arquivos_absoluta = os.path.abspath(pasta_arquivos)
+print("\n" + "="*80)
+print("✅ EXTRAÇÃO CONCLUÍDA COM SUCESSO!")
+print("="*80)
+print(f"📁 Pasta dos arquivos Excel: {pasta_arquivos_absoluta}")
+print("🔗 Para abrir a pasta, copie e cole este caminho no Windows Explorer:")
+print(f"   {pasta_arquivos_absoluta}")
+print("")
+print("📊 Arquivos gerados:")
+print("   • Arquivos Parquet: pasta KE5Z/")
+print("   • Arquivos Excel: pasta arquivos/")
+print("")
+print("💡 Dica: Pressione Win+R, cole o caminho e pressione Enter para abrir a pasta!")
+print("="*80)
+
+# Tentar abrir a pasta automaticamente no Windows
+try:
+    import subprocess
+    if os.name == 'nt':  # Windows
+        subprocess.run(['explorer', pasta_arquivos_absoluta], check=False)
+        print("🚀 Pasta aberta automaticamente no Windows Explorer!")
+    else:
+        print("ℹ️  Sistema não-Windows detectado. Abra a pasta manualmente.")
+except Exception as e:
+    print(f"⚠️  Não foi possível abrir a pasta automaticamente: {e}")
+    print(f"   Abra manualmente: {pasta_arquivos_absoluta}")

@@ -63,7 +63,7 @@ with col1:
 
 with col2:
     st.markdown("### 📄 Arquivos Excel")
-    st.markdown("**Localização:** `arquivos/`")
+    st.markdown("**Localização:** `_internal/arquivos/`")
     st.markdown("**Arquivos:**")
     st.markdown("- `KE5Z_[USI].xlsx` (por USI)")
     st.markdown("- `KE5Z_veiculos.xlsx`")
@@ -72,7 +72,7 @@ with col2:
 
 with col3:
     st.markdown("### 📝 Arquivos TXT")
-    st.markdown("**Localização:** `_internal/Extracoes/`")
+    st.markdown("**Localização:** `_internal/Extracoes/` (arquivos de entrada)")
     st.markdown("**Pastas:**")
     st.markdown("- `KE5Z/` (arquivos KE5Z)")
     st.markdown("- `KSBB/` (arquivos KSBB)")
@@ -85,6 +85,7 @@ col1, col2, col3 = st.columns(3)
 
 with col1:
     if st.button("📂 Abrir Pasta Parquet", help="Abre a pasta com arquivos .parquet"):
+        # Arquivos Parquet ficam no _internal
         parquet_path = os.path.join(os.path.dirname(sys.executable), "_internal", "KE5Z")
         if os.path.exists(parquet_path):
             os.startfile(parquet_path)
@@ -94,15 +95,17 @@ with col1:
 
 with col2:
     if st.button("📂 Abrir Pasta Excel", help="Abre a pasta com arquivos .xlsx"):
-        excel_path = os.path.join(os.path.dirname(sys.executable), "arquivos")
+        # Arquivos Excel ficam no _internal
+        excel_path = os.path.join(os.path.dirname(sys.executable), "_internal", "arquivos")
         if os.path.exists(excel_path):
             os.startfile(excel_path)
             st.success("✅ Pasta aberta!")
         else:
-            st.error("❌ Pasta não encontrada!")
+            st.error(f"❌ Pasta não encontrada! Procurada em: {excel_path}")
 
 with col3:
     if st.button("📂 Abrir Pasta TXT", help="Abre a pasta com arquivos .txt"):
+        # Arquivos TXT ficam no _internal (são arquivos de entrada, não saída)
         txt_path = os.path.join(os.path.dirname(sys.executable), "_internal", "Extracoes")
         if os.path.exists(txt_path):
             os.startfile(txt_path)
@@ -140,6 +143,7 @@ def contar_arquivos_pasta(caminho):
 # Verificar arquivos Parquet
 with col1:
     st.markdown("**📊 Arquivos Parquet:**")
+    # Arquivos Parquet ficam no _internal
     parquet_dir = os.path.join(os.path.dirname(sys.executable), "_internal", "KE5Z")
     if verificar_arquivo_existe(parquet_dir):
         arquivos_parquet = [f for f in os.listdir(parquet_dir) if f.endswith('.parquet')]
@@ -154,7 +158,8 @@ with col1:
 # Verificar arquivos Excel
 with col2:
     st.markdown("**📄 Arquivos Excel:**")
-    excel_dir = os.path.join(os.path.dirname(sys.executable), "arquivos")
+    # Arquivos Excel ficam no _internal
+    excel_dir = os.path.join(os.path.dirname(sys.executable), "_internal", "arquivos")
     if verificar_arquivo_existe(excel_dir):
         arquivos_excel = [f for f in os.listdir(excel_dir) if f.endswith('.xlsx')]
         st.success(f"✅ {len(arquivos_excel)} arquivos encontrados")
@@ -170,6 +175,7 @@ with col2:
 # Verificar arquivos TXT
 with col3:
     st.markdown("**📝 Arquivos TXT:**")
+    # Arquivos TXT ficam no _internal (são arquivos de entrada, não saída)
     txt_dir = os.path.join(os.path.dirname(sys.executable), "_internal", "Extracoes")
     if verificar_arquivo_existe(txt_dir):
         total_txt = 0
@@ -329,7 +335,7 @@ def verificar_arquivos_necessarios():
     return todos_ok, resultados
 
 
-def executar_extracao(meses_filtro=None, progress_callback=None):
+def executar_extracao(meses_filtro=None, progress_callback=None, logs_placeholder=None):
     """Executa o script Extração.py com captura de logs em tempo real"""
     try:
         # Obter diretório base (onde está o executável)
@@ -344,68 +350,136 @@ def executar_extracao(meses_filtro=None, progress_callback=None):
         if progress_callback:
             progress_callback(10, "🚀 Iniciando execução...", "Preparando ambiente")
 
-        # Determinar o caminho correto do Python
-        if hasattr(sys, '_MEIPASS'):
-            # Executando dentro do PyInstaller - usar python.exe do sistema
-            python_path = "python"
-        else:
-            # Executando normalmente
-            python_path = sys.executable
-            
         script_path = os.path.join(base_dir, "Extracao.py")
-        adicionar_log(f"🐍 Usando Python: {python_path}")
-        adicionar_log(f"📄 Script: {script_path}")
-        if progress_callback:
-            progress_callback(15, "⚙️ Iniciando subprocess...", "Executando script")
-
+        
         # Passar meses selecionados via variável de ambiente (ex.: "9,10,11")
-        env = os.environ.copy()
         try:
             if meses_filtro and isinstance(meses_filtro, (list, tuple)):
-                env["MESES_FILTRO"] = ",".join(str(int(m)) for m in meses_filtro)
+                os.environ["MESES_FILTRO"] = ",".join(str(int(m)) for m in meses_filtro)
         except Exception:
             # Em caso de qualquer problema na serialização, ignorar silenciosamente
             pass
 
-        processo = subprocess.Popen(
-            [python_path, "-u", script_path],
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
-            text=True,
-            cwd=base_dir,
-            encoding='cp1252',
-            errors='replace',
-            bufsize=1,
-            universal_newlines=True,
-            env=env,
-        )
+        # Executar de forma diferente dependendo do ambiente
+        if hasattr(sys, '_MEIPASS'):
+            # Executando dentro do PyInstaller - usar subprocess para logs em tempo real
+            adicionar_log("🐍 Executando via subprocess (PyInstaller)")
+            adicionar_log(f"📄 Script: {script_path}")
+            if progress_callback:
+                progress_callback(15, "⚙️ Iniciando subprocess...", "Executando script")
 
-        # Leitura em tempo real do stdout
-        linhas_lidas = 0
-        for linha in iter(processo.stdout.readline, ''):
-            if linha == '' and processo.poll() is not None:
-                break
-            texto = linha.strip()
-            if texto:
-                adicionar_log(texto, sem_timestamp=True)
-                linhas_lidas += 1
-                if linhas_lidas % 5 == 0 and progress_callback:
-                    pct = min(75, 15 + linhas_lidas)
-                    progress_callback(pct, "⚙️ Processando...", f"Linhas: {linhas_lidas}")
-                # Atualizar logs na tela
-                ultimos = st.session_state.logs[-30:]
-                with logs_placeholder.container():
-                    for l in ultimos:
-                        st.write(l)
+            # Preparar ambiente para subprocess
+            env = os.environ.copy()
+            try:
+                if meses_filtro and isinstance(meses_filtro, (list, tuple)):
+                    env["MESES_FILTRO"] = ",".join(str(int(m)) for m in meses_filtro)
+            except Exception:
+                pass
 
-        # Capturar stderr ao final
-        stderr_restante = processo.stderr.read() or ''
-        if stderr_restante:
-            for linha in stderr_restante.split('\n'):
-                if linha.strip():
-                    adicionar_log(linha.strip(), sem_timestamp=True)
+            # Usar python.exe do _internal para executar o script
+            python_exe = os.path.join(sys._MEIPASS, "python.exe")
+            if not os.path.exists(python_exe):
+                # Fallback para python do sistema se não encontrar no _internal
+                python_exe = "python"
+            
+            processo = subprocess.Popen(
+                [python_exe, "-u", script_path],
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                text=True,
+                cwd=base_dir,
+                encoding='utf-8',
+                errors='replace',
+                bufsize=1,
+                universal_newlines=True,
+                env=env,
+            )
 
-        return_code = processo.wait()
+            # Leitura em tempo real do stdout
+            linhas_lidas = 0
+            for linha in iter(processo.stdout.readline, ''):
+                if linha == '' and processo.poll() is not None:
+                    break
+                texto = linha.strip()
+                if texto:
+                    adicionar_log(texto, sem_timestamp=True)
+                    linhas_lidas += 1
+                    if linhas_lidas % 5 == 0 and progress_callback:
+                        pct = min(75, 15 + linhas_lidas)
+                        progress_callback(pct, "⚙️ Processando...", f"Linhas: {linhas_lidas}")
+                    # Atualizar logs na tela (se placeholder estiver disponível)
+                    if logs_placeholder is not None:
+                        ultimos = st.session_state.logs[-30:]
+                        with logs_placeholder.container():
+                            for log_line in ultimos:
+                                st.write(log_line)
+
+            # Capturar stderr ao final
+            stderr_restante = processo.stderr.read() or ''
+            if stderr_restante:
+                for linha in stderr_restante.split('\n'):
+                    if linha.strip():
+                        adicionar_log(linha.strip(), sem_timestamp=True)
+
+            return_code = processo.wait()
+                
+        else:
+            # Executando normalmente - usar subprocess
+            python_path = sys.executable
+            adicionar_log(f"🐍 Usando Python: {python_path}")
+            adicionar_log(f"📄 Script: {script_path}")
+            if progress_callback:
+                progress_callback(15, "⚙️ Iniciando subprocess...", "Executando script")
+
+            # Preparar ambiente para subprocess
+            env = os.environ.copy()
+            try:
+                if meses_filtro and isinstance(meses_filtro, (list, tuple)):
+                    env["MESES_FILTRO"] = ",".join(str(int(m)) for m in meses_filtro)
+            except Exception:
+                pass
+
+            processo = subprocess.Popen(
+                [python_path, "-u", script_path],
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                text=True,
+                cwd=base_dir,
+                encoding='cp1252',
+                errors='replace',
+                bufsize=1,
+                universal_newlines=True,
+                env=env,
+            )
+
+            # Leitura em tempo real do stdout
+            linhas_lidas = 0
+            for linha in iter(processo.stdout.readline, ''):
+                if linha == '' and processo.poll() is not None:
+                    break
+                texto = linha.strip()
+                if texto:
+                    adicionar_log(texto, sem_timestamp=True)
+                    linhas_lidas += 1
+                    if linhas_lidas % 5 == 0 and progress_callback:
+                        pct = min(75, 15 + linhas_lidas)
+                        progress_callback(pct, "⚙️ Processando...", f"Linhas: {linhas_lidas}")
+                    # Atualizar logs na tela (se placeholder estiver disponível)
+                    if logs_placeholder is not None:
+                        ultimos = st.session_state.logs[-30:]
+                        with logs_placeholder.container():
+                            for log_line in ultimos:
+                                st.write(log_line)
+
+            # Capturar stderr ao final
+            stderr_restante = processo.stderr.read() or ''
+            if stderr_restante:
+                for linha in stderr_restante.split('\n'):
+                    if linha.strip():
+                        adicionar_log(linha.strip(), sem_timestamp=True)
+
+            return_code = processo.wait()
+
         adicionar_log(f"📊 Código de retorno: {return_code}", f"Status: {'Sucesso' if return_code == 0 else 'Erro'}")
         if progress_callback:
             progress_callback(85, "📊 Processamento concluído", "Verificando arquivos")
@@ -583,7 +657,7 @@ def aplicar_filtro_mes_excel(meses_filtro):
 if executar:
     st.session_state.logs.clear()
     atualizar_progresso(10, "Preparando...")
-    ok, msg = executar_extracao(meses_filtro=meses_filtro, progress_callback=atualizar_progresso)
+    ok, msg = executar_extracao(meses_filtro=meses_filtro, progress_callback=atualizar_progresso, logs_placeholder=logs_placeholder)
     atualizar_progresso(80, "Verificando arquivos...")
     verificar_arquivos_gerados()
     atualizar_progresso(100, "Concluído")
