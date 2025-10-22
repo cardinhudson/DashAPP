@@ -663,8 +663,10 @@ if meses_env:
 # Se houver filtro, aplicar sobre os DataFrames antes de salvar
 if meses_filtrados and 'Mes' in df_total.columns:
     df_total_excel = df_total[df_total['Mes'].isin(meses_filtrados)].copy()
+    print(f"Filtro aplicado: {len(df_total_excel):,} linhas após filtrar meses {sorted(meses_filtrados)}")
 else:
     df_total_excel = df_total.copy()
+    print(f"Sem filtro aplicado: {len(df_total_excel):,} linhas totais")
 
 # Criar pasta 'arquivos' local para salvar os arquivos Excel
 pasta_arquivos = DIR_ARQUIVOS_OUT
