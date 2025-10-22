@@ -118,7 +118,17 @@ def load_data_optimized(arquivo_tipo="completo"):
             # Se arquivo específico não existe, tentar arquivo completo
             if arquivo_tipo != "completo":
                 st.warning(f"⚠️ Arquivo {nome_arquivo} não encontrado, carregando dados completos...")
-                return load_data_optimized("completo")
+                # CORREÇÃO: Evitar loop infinito - carregar diretamente o arquivo completo
+                arquivo_completo = os.path.join(base_path, "KE5Z", "KE5Z.parquet")
+                if os.path.exists(arquivo_completo):
+                    df = pd.read_parquet(arquivo_completo)
+                    # Aplicar filtro especial para main_filtered (cloud mode)
+                    if arquivo_tipo == "main_filtered" and 'USI' in df.columns:
+                        df = df[df['USI'] != 'Others'].copy()
+                        st.sidebar.info(f"🔄 Filtro aplicado: {len(df):,} registros (Others removidos)")
+                    return df
+                else:
+                    raise FileNotFoundError(f"Arquivo completo também não encontrado: {arquivo_completo}")
             raise FileNotFoundError(f"Arquivo não encontrado: {arquivo_parquet}")
         
         # Verificar tamanho do arquivo

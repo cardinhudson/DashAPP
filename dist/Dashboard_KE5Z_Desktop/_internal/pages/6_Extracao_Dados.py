@@ -143,8 +143,13 @@ def contar_arquivos_pasta(caminho):
 # Verificar arquivos Parquet
 with col1:
     st.markdown("**📊 Arquivos Parquet:**")
-    # Arquivos Parquet ficam no _internal
-    parquet_dir = os.path.join(os.path.dirname(sys.executable), "_internal", "KE5Z")
+    # Arquivos Parquet - caminho correto baseado no ambiente
+    if hasattr(sys, '_MEIPASS'):
+        # PyInstaller: arquivos ficam no _internal
+        parquet_dir = os.path.join(sys._MEIPASS, "KE5Z")
+    else:
+        # Desenvolvimento: arquivos ficam na pasta local
+        parquet_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "KE5Z")
     if verificar_arquivo_existe(parquet_dir):
         arquivos_parquet = [f for f in os.listdir(parquet_dir) if f.endswith('.parquet')]
         st.success(f"✅ {len(arquivos_parquet)} arquivos encontrados")
@@ -158,8 +163,13 @@ with col1:
 # Verificar arquivos Excel
 with col2:
     st.markdown("**📄 Arquivos Excel:**")
-    # Arquivos Excel ficam no _internal
-    excel_dir = os.path.join(os.path.dirname(sys.executable), "_internal", "arquivos")
+    # Arquivos Excel - caminho correto baseado no ambiente
+    if hasattr(sys, '_MEIPASS'):
+        # PyInstaller: arquivos ficam no _internal
+        excel_dir = os.path.join(sys._MEIPASS, "arquivos")
+    else:
+        # Desenvolvimento: arquivos ficam na pasta local
+        excel_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "arquivos")
     if verificar_arquivo_existe(excel_dir):
         arquivos_excel = [f for f in os.listdir(excel_dir) if f.endswith('.xlsx')]
         st.success(f"✅ {len(arquivos_excel)} arquivos encontrados")
@@ -175,8 +185,13 @@ with col2:
 # Verificar arquivos TXT
 with col3:
     st.markdown("**📝 Arquivos TXT:**")
-    # Arquivos TXT ficam no _internal (são arquivos de entrada, não saída)
-    txt_dir = os.path.join(os.path.dirname(sys.executable), "_internal", "Extracoes")
+    # Arquivos TXT - caminho correto baseado no ambiente
+    if hasattr(sys, '_MEIPASS'):
+        # PyInstaller: arquivos ficam no _internal
+        txt_dir = os.path.join(sys._MEIPASS, "Extracoes")
+    else:
+        # Desenvolvimento: arquivos ficam na pasta local
+        txt_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "Extracoes")
     if verificar_arquivo_existe(txt_dir):
         total_txt = 0
         for subdir in ['KE5Z', 'KSBB', 'KSBB_veiculos', 'KSBB_imoveis']:
@@ -362,66 +377,131 @@ def executar_extracao(meses_filtro=None, progress_callback=None, logs_placeholde
 
         # Executar de forma diferente dependendo do ambiente
         if hasattr(sys, '_MEIPASS'):
-            # Executando dentro do PyInstaller - usar subprocess para logs em tempo real
-            adicionar_log("🐍 Executando via subprocess (PyInstaller)")
+            # Executando dentro do PyInstaller - executar diretamente para evitar problemas de python.exe
+            adicionar_log("🐍 Executando script diretamente (PyInstaller)")
             adicionar_log(f"📄 Script: {script_path}")
             if progress_callback:
-                progress_callback(15, "⚙️ Iniciando subprocess...", "Executando script")
+                progress_callback(15, "⚙️ Iniciando execução direta...", "Executando script")
 
-            # Preparar ambiente para subprocess
-            env = os.environ.copy()
-            try:
-                if meses_filtro and isinstance(meses_filtro, (list, tuple)):
-                    env["MESES_FILTRO"] = ",".join(str(int(m)) for m in meses_filtro)
-            except Exception:
-                pass
-
-            # Usar python.exe do _internal para executar o script
-            python_exe = os.path.join(sys._MEIPASS, "python.exe")
-            if not os.path.exists(python_exe):
-                # Fallback para python do sistema se não encontrar no _internal
-                python_exe = "python"
+            # Executar com captura de logs em tempo real usando threading
+            import threading
+            import queue
+            import time
+            from io import StringIO
             
-            processo = subprocess.Popen(
-                [python_exe, "-u", script_path],
-                stdout=subprocess.PIPE,
-                stderr=subprocess.PIPE,
-                text=True,
-                cwd=base_dir,
-                encoding='utf-8',
-                errors='replace',
-                bufsize=1,
-                universal_newlines=True,
-                env=env,
-            )
-
-            # Leitura em tempo real do stdout
+            # Queue para capturar logs em tempo real
+            log_queue = queue.Queue()
+            
+            def capture_output():
+                """Captura stdout/stderr e envia para a queue"""
+                old_stdout = sys.stdout
+                old_stderr = sys.stderr
+                
+                class OutputCapture:
+                    def __init__(self, original, queue, prefix=""):
+                        self.original = original
+                        self.queue = queue
+                        self.prefix = prefix
+                        self.buffer = ""
+                    
+                    def write(self, text):
+                        self.buffer += text
+                        if '\n' in self.buffer:
+                            lines = self.buffer.split('\n')
+                            for line in lines[:-1]:
+                                if line.strip():
+                                    self.queue.put(f"{self.prefix}{line.strip()}")
+                            self.buffer = lines[-1]
+                        self.original.write(text)
+                    
+                    def flush(self):
+                        if self.buffer.strip():
+                            self.queue.put(f"{self.prefix}{self.buffer.strip()}")
+                            self.buffer = ""
+                        self.original.flush()
+                
+                sys.stdout = OutputCapture(old_stdout, log_queue, "")
+                sys.stderr = OutputCapture(old_stderr, log_queue, "ERR: ")
+                
+                try:
+                    # Executar o script diretamente
+                    with open(script_path, 'r', encoding='utf-8') as f:
+                        script_content = f.read()
+                    
+                    # Criar contexto de execução
+                    exec_context = {
+                        '__name__': '__main__',
+                        '__file__': script_path,
+                        '__builtins__': __builtins__,
+                    }
+                    
+                    # Executar o script
+                    exec(script_content, exec_context)
+                    
+                except Exception as e:
+                    log_queue.put(f"❌ Erro na execução: {str(e)}")
+                finally:
+                    # Restaurar stdout/stderr
+                    sys.stdout = old_stdout
+                    sys.stderr = old_stderr
+                    log_queue.put("__END__")  # Sinal de fim
+            
+            # Iniciar thread de execução
+            exec_thread = threading.Thread(target=capture_output)
+            exec_thread.daemon = True
+            exec_thread.start()
+            
+            # Processar logs em tempo real
             linhas_lidas = 0
-            for linha in iter(processo.stdout.readline, ''):
-                if linha == '' and processo.poll() is not None:
+            start_time = time.time()
+            
+            while exec_thread.is_alive() or not log_queue.empty():
+                try:
+                    # Tentar obter log com timeout
+                    log_line = log_queue.get(timeout=0.1)
+                    
+                    if log_line == "__END__":
+                        break
+                    
+                    if log_line.strip():
+                        adicionar_log(log_line.strip(), sem_timestamp=True)
+                        linhas_lidas += 1
+                        
+                        # Atualizar progresso
+                        if progress_callback:
+                            elapsed = time.time() - start_time
+                            # Simular progresso baseado no tempo e linhas
+                            progress = min(90, 20 + (elapsed * 2) + (linhas_lidas * 0.5))
+                            progress_callback(progress, "⚙️ Processando...", f"Linhas: {linhas_lidas}")
+                        
+                        # Atualizar logs na tela (se placeholder estiver disponível)
+                        if logs_placeholder is not None:
+                            ultimos = st.session_state.logs[-30:]
+                            with logs_placeholder.container():
+                                for log_line_display in ultimos:
+                                    st.write(log_line_display)
+                
+                except queue.Empty:
+                    # Timeout - continuar verificando
+                    time.sleep(0.1)
+                    continue
+                except Exception as e:
+                    adicionar_log(f"❌ Erro no processamento de logs: {str(e)}")
                     break
-                texto = linha.strip()
-                if texto:
-                    adicionar_log(texto, sem_timestamp=True)
-                    linhas_lidas += 1
-                    if linhas_lidas % 5 == 0 and progress_callback:
-                        pct = min(75, 15 + linhas_lidas)
-                        progress_callback(pct, "⚙️ Processando...", f"Linhas: {linhas_lidas}")
-                    # Atualizar logs na tela (se placeholder estiver disponível)
-                    if logs_placeholder is not None:
-                        ultimos = st.session_state.logs[-30:]
-                        with logs_placeholder.container():
-                            for log_line in ultimos:
-                                st.write(log_line)
-
-            # Capturar stderr ao final
-            stderr_restante = processo.stderr.read() or ''
-            if stderr_restante:
-                for linha in stderr_restante.split('\n'):
-                    if linha.strip():
-                        adicionar_log(linha.strip(), sem_timestamp=True)
-
-            return_code = processo.wait()
+            
+            # Aguardar thread terminar
+            exec_thread.join(timeout=5)
+            
+            # Processar logs restantes
+            while not log_queue.empty():
+                try:
+                    log_line = log_queue.get_nowait()
+                    if log_line != "__END__" and log_line.strip():
+                        adicionar_log(log_line.strip(), sem_timestamp=True)
+                except queue.Empty:
+                    break
+            
+            return_code = 0  # Sucesso
                 
         else:
             # Executando normalmente - usar subprocess

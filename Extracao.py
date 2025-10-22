@@ -48,10 +48,10 @@ if hasattr(sys, '_MEIPASS'):
 # Pasta raiz do projeto (para ENTRADA - dentro do _internal)
 ROOT_DIR = sys._MEIPASS if hasattr(sys, '_MEIPASS') else os.path.dirname(os.path.abspath(__file__))
 
-# Pasta raiz para SAÍDA (diretório do executável para arquivos de saída)
+# Pasta raiz para SAÍDA (dentro do _internal para manter consistência)
 if hasattr(sys, '_MEIPASS'):
-    # No executável: salvar no diretório do executável (fora do _internal)
-    OUTPUT_DIR = os.path.dirname(sys.executable)
+    # No executável: salvar dentro do _internal para manter consistência
+    OUTPUT_DIR = sys._MEIPASS
 else:
     # Em desenvolvimento: mesmo diretório
     OUTPUT_DIR = os.path.dirname(os.path.abspath(__file__))

@@ -193,7 +193,20 @@ def load_data(arquivo_tipo="completo"):
             # Se arquivo específico não existe, tentar arquivo completo
             if arquivo_tipo != "completo":
                 st.warning(f"⚠️ Arquivo {nome_arquivo} não encontrado, carregando dados completos...")
-                return load_data("completo")
+                # CORREÇÃO: Evitar loop infinito - carregar diretamente o arquivo completo
+                arquivo_completo = os.path.join("KE5Z", "KE5Z.parquet")
+                if os.path.exists(arquivo_completo):
+                    df = pd.read_parquet(arquivo_completo)
+                    # Aplicar filtro baseado no tipo solicitado
+                    if 'USI' in df.columns:
+                        if arquivo_tipo == "main":
+                            df = df[df['USI'] != 'Others'].copy()
+                        elif arquivo_tipo == "others":
+                            df = df[df['USI'] == 'Others'].copy()
+                    return df
+                else:
+                    st.error(f"❌ Arquivo completo também não encontrado: {arquivo_completo}")
+                    return pd.DataFrame()
             st.error(f"❌ Arquivo não encontrado: {arquivo_parquet}")
             return pd.DataFrame()
         
